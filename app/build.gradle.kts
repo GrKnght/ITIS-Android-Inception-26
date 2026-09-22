@@ -25,13 +25,20 @@ android {
                 enable = false
             }
         }
+
+        create("dev") {
+            applicationIdSuffix = ".test"
+        }
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
+
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -40,6 +47,11 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.compose.material3)
+    // Coil
+    // implementation(libs.coil.core)
+    // implementation(libs.coil.network)
+    implementation(libs.bundles.coil)
+
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
