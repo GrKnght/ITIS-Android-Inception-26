@@ -1,145 +1,171 @@
 package ru.detmir.kmp.core.network.itis.android.inception26
 
-import android.app.ComponentCaller
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.net.toUri
-import ru.detmir.kmp.core.network.itis.android.inception26.ui.theme.Itisandroidinception26Theme
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
+import androidx.compose.ui.unit.dp
+import ru.detmir.kmp.core.network.itis.android.inception26.model.NavRoute
+import ru.detmir.kmp.core.network.itis.android.inception26.ui.widget.DescriptionSample
 
 class MainActivity : ComponentActivity() {
 
-    private var textToShow = "Hello Android!"
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        showLog("onCreate")
-        enableEdgeToEdge()
+        //enableEdgeToEdge()
         setContent {
-            Itisandroidinception26Theme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+            val currentRoute = remember { mutableStateOf<NavRoute>(NavRoute.Main) }
+
+            BackHandler(enabled = currentRoute.value is NavRoute.Description) {
+                currentRoute.value = NavRoute.Main
+            }
+
+            when (currentRoute.value) {
+                is NavRoute.Main -> {
+                    println("TEST TAG - Main branch")
+                    LazyColumnSample(currentRoute)
+                }
+
+                is NavRoute.Description -> {
+                    DescriptionSample((currentRoute.value as NavRoute.Description).index)
                 }
             }
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
-        super.onSaveInstanceState(outState, outPersistentState)
-        outState.putString("textToShowKey", textToShow)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        textToShow = savedInstanceState.getString("textToShowKey") ?: "Hello Android"
-    }
-
-    override fun onStart() {
-        super.onStart()
-        showLog("onStart")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        showLog("onResume")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        showLog("onPause")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        showLog("onStop")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        showLog("onDestroy")
-    }
-
-    @Composable
-    fun Greeting(name: String, modifier: Modifier = Modifier) {
-        Column {
-            val buttonText = remember { mutableStateOf("$name") }
-
-            Text(
-                text = "Hello ${buttonText.value}",
-                modifier = modifier
-            )
-            "http".toUri()
-
-            Intent().apply {
-                action = Intent.ACTION_SEND
-                addCategory(Intent.CATEGORY_DEFAULT)
-            }
-            Button(onClick = {
-                // buttonText.value = "New value Hello!"
-                val explicit = Intent(this@MainActivity, SecondActivity::class.java)
-                    .apply {
-                        addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    }
-                val intent = Intent().apply {
-                    action = Intent.ACTION_MEDIA_SHARED
-                    addCategory("")
-                }
-                startActivity(explicit)
-            }) {
-                Text("Click me")
-            }
-        }
-    }
-
-    override fun onNewIntent(intent: Intent, caller: ComponentCaller) {
-        super.onNewIntent(intent, caller)
-    }
-
-    private fun showLog(message: String) {
-        println("TEST TAG - Hello from: $message")
-    }
-
-    private class InnerClassExample() {
-
-        private var localContext: Context? = null
-
-        fun initContext(ctx: Context) {
-            localContext = ctx
-
-            localContext?.getString(R.string.title_activity_main)
-        }
-    }
-
-    private class AppContextExample(
-        private val appCtx: Context
-    ) {
-
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview() {
-//    Itisandroidinception26Theme {
-//        Greeting("Android")
-//    }
-//}
+@Composable
+private fun DefaultColumn() {
+    val scrollState = rememberScrollState()
+
+    Column(
+        modifier = Modifier.verticalScroll(scrollState)
+    ) {
+        repeat(30) { index ->
+            val backgroundColor = when {
+                index % 5 == 0 -> Color.Green
+
+                index % 3 == 0 -> Color.Red
+
+                index % 2 == 0 -> Color.Blue
+
+                else -> Color.Black
+            }
+
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .background(backgroundColor)
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .clickable {
+                        println("TEST TAG - Current Index: $index")
+
+                    }
+            ) {
+                val textColor = if (backgroundColor == Color.Black || backgroundColor == Color.Blue) {
+                    Color.White
+                } else {
+                    Color.Black
+                }
+
+                Text(
+                    text = index.toString(),
+                    color = textColor,
+                    fontSize = TextUnit(32f, TextUnitType.Sp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun LazyColumnSample(
+    currentRoute: MutableState<NavRoute>
+) {
+    LazyColumn {
+        item {
+            Text(text = "Some Header Text to show", fontSize = TextUnit(32f, TextUnitType.Sp))
+        }
+
+        items(count = 30, key = { "data:$it" }) { index ->
+            val backgroundColor = when {
+                index % 5 == 0 -> Color.Green
+
+                index % 3 == 0 -> Color.Red
+
+                index % 2 == 0 -> Color.Blue
+
+                else -> Color.Black
+            }
+
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .background(backgroundColor)
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .clickable {
+                        println("TEST TAG - Current Index: $index")
+                        currentRoute.value = NavRoute.Description(index)
+                    }
+            ) {
+                val textColor = if (backgroundColor == Color.Black || backgroundColor == Color.Blue) {
+                    Color.White
+                } else {
+                    Color.Black
+                }
+
+                Text(
+                    text = index.toString(),
+                    color = textColor,
+                    fontSize = TextUnit(32f, TextUnitType.Sp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+fun Greeting(name: String) {
+    Column {
+        Text(text = name)
+        AnotherTextToShow()
+    }
+}
+
+@Preview
+@Composable
+private fun GreetingPreview() {
+    Greeting(name = "Preview text")
+}
+
+@Composable
+fun AnotherTextToShow() {
+    Text(text = "Another Text")
+}
