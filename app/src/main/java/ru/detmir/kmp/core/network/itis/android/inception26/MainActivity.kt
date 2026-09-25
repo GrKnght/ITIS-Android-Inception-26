@@ -66,9 +66,7 @@ private fun String.doubleLengthPlusArg(arg1: Int, arg2: Int, arg3: Int): Int {
     return this.length * 2 + arg1
 }
 
-inline fun <reified E> sampleFun(): E {
-
-}
+inline fun <reified E> sampleFun(): E {}
 
 
 private fun String?.doubleNullable(): Int {
@@ -77,9 +75,7 @@ private fun String?.doubleNullable(): Int {
 
 private fun GlobalError.someFunction(
     arg1: Int
-): Int {
-
-}
+): Int {}
 
 class DefaultClass {
 
@@ -100,9 +96,7 @@ class DefaultClass {
 
 object DefaultStaticClass {
 
-    fun plusResult() {
-
-    }
+    fun plusResult() {}
 }
 
 
