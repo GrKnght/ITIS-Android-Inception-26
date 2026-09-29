@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -27,24 +28,47 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import ru.detmir.kmp.core.network.itis.android.inception26.model.NavRoute
+import ru.detmir.kmp.core.network.itis.android.inception26.screen.auth.AuthRoute
+import ru.detmir.kmp.core.network.itis.android.inception26.screen.profile.ProfileRoute
 import ru.detmir.kmp.core.network.itis.android.inception26.ui.widget.DescriptionSample
 
 class MainActivity : ComponentActivity() {
 
+    private var backStack = mutableSetOf<NavRoute>(NavRoute.Auth)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //enableEdgeToEdge()
-        setContent {
-            val currentRoute = remember { mutableStateOf<NavRoute>(NavRoute.Main) }
+        enableEdgeToEdge()
 
-            BackHandler(enabled = currentRoute.value is NavRoute.Description) {
-                currentRoute.value = NavRoute.Main
+        setContent {
+            val currentRoute = remember { mutableStateOf(backStack.last()) }
+
+            BackHandler(enabled = backStack.size > 1) {
+                val last = backStack.last()
+                backStack.remove(last)
+                val newLast = backStack.last()
+                currentRoute.value = newLast
             }
 
             when (currentRoute.value) {
                 is NavRoute.Main -> {
-                    println("TEST TAG - Main branch")
                     LazyColumnSample(currentRoute)
+                }
+
+                is NavRoute.Auth -> {
+                    AuthRoute { userData ->
+                        currentRoute.value = NavRoute.Profile(
+                            email = userData.email,
+                            password = userData.password
+                        )
+                        backStack.add(currentRoute.value)
+                    }
+                }
+
+                is NavRoute.Profile -> {
+                    val email = (currentRoute.value as NavRoute.Profile).email
+                    val pass = (currentRoute.value as NavRoute.Profile).password
+                    ProfileRoute(email = email, password = pass)
                 }
 
                 is NavRoute.Description -> {
@@ -52,6 +76,25 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        val result = backStack.toTypedArray()
+        outState.putSerializable(BACKSTACK_TAG, result)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        savedInstanceState.getSerializable(BACKSTACK_TAG)?.let { result ->
+            (result as? Array<NavRoute>)?.let {
+                backStack = it.toMutableSet()
+            }
+        }
+    }
+
+    private companion object {
+        const val BACKSTACK_TAG = "NAV_BACKSTACK"
     }
 }
 

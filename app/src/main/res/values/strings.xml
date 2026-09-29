@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">itis-android-inception-26</string>
     <string name="title_activity_main">MainActivity</string>
+
+    <!-- Auth Screen START -->
+    <string name="auth_button_text">Авторизация</string>
+    <string name="email_text_field_label">E-mail</string>
+    <string name="email_not_matches_error">Введенная строка не является email</string>
+    <string name="password_text_field_label">Пароль</string>
+    <string name="password_length_error">Длина пароля меньше 8 символов</string>
+    <!-- Auth Screen END -->
 </resources>
