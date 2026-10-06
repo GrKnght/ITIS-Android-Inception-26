@@ -12,7 +12,12 @@ sealed class NavRoute {
     data class Profile(
         val email: String,
         val password: String,
-    ) : NavRoute()
+    ) : NavRoute() {
+
+        companion object {
+            val route: String = "NavProfileRoute"
+        }
+    }
 
     data class Description(val index: Int) : NavRoute()
 }
