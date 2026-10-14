@@ -9,3 +9,11 @@ data class MainTypeSafeRoute(
 
 @Serializable
 object ProfileTypeSafeRoute
+
+@Serializable
+object ListNavRoute
+
+@Serializable
+data class DetailsNavRoute(
+    val catModel: CatModel
+)
