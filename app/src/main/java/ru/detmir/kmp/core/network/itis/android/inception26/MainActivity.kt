@@ -4,70 +4,74 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
-import ru.detmir.kmp.core.network.itis.android.inception26.model.CatModel
-import ru.detmir.kmp.core.network.itis.android.inception26.model.DetailsNavRoute
-import ru.detmir.kmp.core.network.itis.android.inception26.model.ListNavRoute
-import ru.detmir.kmp.core.network.itis.android.inception26.model.MainTypeSafeRoute
-import ru.detmir.kmp.core.network.itis.android.inception26.model.ProfileTypeSafeRoute
-import ru.detmir.kmp.core.network.itis.android.inception26.model.UserDataModel
-import ru.detmir.kmp.core.network.itis.android.inception26.model.navType.catModelNavType
-import ru.detmir.kmp.core.network.itis.android.inception26.model.navType.userDataNavType
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.remember
+import androidx.compose.ui.window.DialogProperties
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.scene.DialogSceneStrategy
+import androidx.navigation3.ui.NavDisplay
+import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.BottomSheetDefaultNav3Route
+import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.DetailsNav3Route
+import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.DialogSampleNav3Route
+import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.ListNav3Route
+import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.strategy.BottomSheetSceneStrategy
+import ru.detmir.kmp.core.network.itis.android.inception26.screen.bottomsheet.DefaultBottomSheet
 import ru.detmir.kmp.core.network.itis.android.inception26.screen.details.DetailsRoute
+import ru.detmir.kmp.core.network.itis.android.inception26.screen.dialogFirst.DialogContent
 import ru.detmir.kmp.core.network.itis.android.inception26.screen.list.ListRoute
-import ru.detmir.kmp.core.network.itis.android.inception26.screen.main.MainScreen
-import ru.detmir.kmp.core.network.itis.android.inception26.screen.profile.ProfileRoute
-import kotlin.reflect.typeOf
 
 class MainActivity : ComponentActivity() {
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setContent {
-            val navController = rememberNavController()
+            val backstack = rememberNavBackStack(elements = arrayOf(ListNav3Route))
+            val dialogStrategy = remember { DialogSceneStrategy<NavKey>() }
+            val bottomSheetStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
 
-            NavHost(
-                navController = navController,
-                startDestination = ListNavRoute,
-            ) {
-                composable<ListNavRoute> { entry ->
-                    ListRoute { model ->
-                        navController.navigate(DetailsNavRoute(model))
+            NavDisplay(
+                backStack = backstack,
+                onBack = { backstack.removeLastOrNull() },
+                sceneStrategies = listOf(
+                    bottomSheetStrategy,
+                    dialogStrategy,
+                ),
+                entryProvider = entryProvider {
+                    entry<ListNav3Route> {
+                        ListRoute { model ->
+                            //backstack.add(DetailsNav3Route(model))
+                            //backstack.add(DialogSampleNav3Route)
+                            backstack.add(BottomSheetDefaultNav3Route)
+                        }
                     }
-                }
 
-                composable<DetailsNavRoute>(
-                    typeMap = mapOf(typeOf<CatModel>() to catModelNavType)
-                ) { entry ->
-                    val data = entry.toRoute<DetailsNavRoute>().catModel
-                    DetailsRoute(data)
-                }
+                    entry<DetailsNav3Route> { entry ->
+                        DetailsRoute(entry.model)
+                    }
 
-                composable<ProfileTypeSafeRoute> { entry ->
-                    ProfileRoute(
-                        email = "E-mail sample",
-                        password = "Password sample",
-                    ) { userData ->
-                        navController.navigate(
-                            MainTypeSafeRoute(userDataModel = userData)
+                    entry<BottomSheetDefaultNav3Route>(
+                        metadata = BottomSheetSceneStrategy.bottomSheet()
+                    ) {
+                        DefaultBottomSheet()
+                    }
+
+                    entry<DialogSampleNav3Route>(
+                        metadata = DialogSceneStrategy.dialog(
+                            DialogProperties(
+                                dismissOnBackPress = false,
+                                windowTitle = "Default dialog"
+                            )
                         )
+                    ) {
+                        DialogContent()
                     }
                 }
-
-                composable<MainTypeSafeRoute>(
-                    typeMap = mapOf(typeOf<UserDataModel>() to userDataNavType),
-                ) { entry ->
-                    val args = entry.toRoute<MainTypeSafeRoute>()
-                    MainScreen(textFieldValue = args.userDataModel.email) {
-                        println("TEST TAG - Clicked!")
-                    }
-                }
-            }
+            )
         }
     }
 }

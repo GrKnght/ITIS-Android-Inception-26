@@ -53,6 +53,9 @@ dependencies {
     // Navigation
     implementation(libs.x.compose.nav)
     implementation(libs.x.serialization.json)
+    // Navigation 3
+    implementation(libs.x.nav3.core)
+    implementation(libs.x.nav3.ui)
 
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)

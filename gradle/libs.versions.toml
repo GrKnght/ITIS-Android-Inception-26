@@ -13,6 +13,7 @@ composeBom = "2026.02.01"
 x-compose-nav = "2.10.2"
 x-serialization = "1.7.3"
 kotlin-serialization = "2.3.20"
+navigation3 = "1.2.0"
 
 # Coil
 coil = "3.2.0"
@@ -40,6 +41,9 @@ coil-network = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = 
 # Navigation
 x-compose-nav = { module = "androidx.navigation:navigation-compose", version.ref = "x-compose-nav" }
 x-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "x-serialization" }
+# Navigation 3
+x-nav3-core = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+x-nav3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 
 [bundles]
 coil = ["coil-core", "coil-network"]
