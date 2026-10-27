@@ -1,22 +1,18 @@
 package ru.detmir.kmp.core.network.itis.android.inception26
 
-import android.Manifest
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
-import ru.detmir.kmp.core.network.itis.android.inception26.model.CatModel
+import ru.detmir.kmp.core.network.itis.android.inception26.model.NotificationModel
 import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.BottomSheetDefaultNav3Route
 import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.DetailsNav3Route
 import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.DialogSampleNav3Route
@@ -26,36 +22,19 @@ import ru.detmir.kmp.core.network.itis.android.inception26.screen.bottomsheet.De
 import ru.detmir.kmp.core.network.itis.android.inception26.screen.details.DetailsRoute
 import ru.detmir.kmp.core.network.itis.android.inception26.screen.dialogFirst.DialogContent
 import ru.detmir.kmp.core.network.itis.android.inception26.screen.list.ListRoute
-import ru.detmir.kmp.core.network.itis.android.inception26.util.PermissionsHandler
+import ru.detmir.kmp.core.network.itis.android.inception26.util.NotificationHandler
 
 class MainActivity : ComponentActivity() {
-
-    private var permissionHandler: PermissionsHandler? = null
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val backstack = mutableStateListOf<NavKey>(ListNav3Route)
-
-        if (permissionHandler == null) {
-            permissionHandler = PermissionsHandler(
-                onPermissionGranted = {
-                    backstack.add(
-                        DetailsNav3Route(
-                            model = CatModel(name = "Cat", url = "URL", desc = "desc")
-                        )
-                    )
-                },
-                onPermissionDenied = {
-
-                },
-                activity = this@MainActivity
-            )
-        }
+        val notifHandler = NotificationHandler(ctx = applicationContext)
+        notifHandler.initNotifications()
 
         setContent {
-            //val backstack = rememberNavBackStack(elements = arrayOf(ListNav3Route))
+            val backstack = rememberNavBackStack(elements = arrayOf(ListNav3Route))
             val dialogStrategy = remember { DialogSceneStrategy<NavKey>() }
             val bottomSheetStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
 
@@ -69,7 +48,13 @@ class MainActivity : ComponentActivity() {
                 entryProvider = entryProvider {
                     entry<ListNav3Route> {
                         ListRoute { model ->
-                            permissionHandler?.requestMultiplePermissions(listOf(Manifest.permission.CAMERA))
+                            notifHandler.sendMessage(
+                                model = NotificationModel(
+                                    id = 1,
+                                    title = "Hello from Android",
+                                    contentText = "Some content text sample"
+                                )
+                            )
                         }
                     }
 
@@ -99,7 +84,6 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        permissionHandler?.clearReference()
         super.onDestroy()
     }
 }
