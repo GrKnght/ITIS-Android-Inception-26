@@ -38,6 +38,15 @@
             android:theme="@style/Theme.Itisandroidinception26"
             android:windowSoftInputMode="adjustResize" />
 
+<!--        <receiver-->
+<!--            android:name=".util.AirplaneModeBroadcastReceiver"-->
+<!--            android:exported="false">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.AIRPLANE_MODE" />-->
+<!--            </intent-filter>-->
+
+<!--        </receiver>-->
+
     </application>
 
 </manifest>

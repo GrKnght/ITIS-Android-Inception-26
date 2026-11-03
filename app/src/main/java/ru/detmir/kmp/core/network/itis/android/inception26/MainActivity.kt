@@ -1,8 +1,10 @@
 package ru.detmir.kmp.core.network.itis.android.inception26
 
-import android.app.ComponentCaller
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,7 +18,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import ru.detmir.kmp.core.network.itis.android.inception26.model.AuthNotification
-import ru.detmir.kmp.core.network.itis.android.inception26.model.PromoNotification
 import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.BottomSheetDefaultNav3Route
 import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.DetailsNav3Route
 import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.DialogSampleNav3Route
@@ -26,16 +27,32 @@ import ru.detmir.kmp.core.network.itis.android.inception26.screen.bottomsheet.De
 import ru.detmir.kmp.core.network.itis.android.inception26.screen.details.DetailsRoute
 import ru.detmir.kmp.core.network.itis.android.inception26.screen.dialogFirst.DialogContent
 import ru.detmir.kmp.core.network.itis.android.inception26.screen.list.ListRoute
+import ru.detmir.kmp.core.network.itis.android.inception26.util.AirplaneModeBroadcastReceiver
 import ru.detmir.kmp.core.network.itis.android.inception26.util.NotificationHandler
 
 class MainActivity : ComponentActivity() {
 
+    private var receiver: AirplaneModeBroadcastReceiver? = null
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Handler(Looper.getMainLooper()).postDelayed(
+            {
+                Toast.makeText(this, "Message after 5000 MS", Toast.LENGTH_SHORT).show()
+            }, 5000L
+        )
         intent?.extras?.getString(Consts.PROMO_NOTIFICATION_LINK_KEY)?.let {
             Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
         }
+        if (receiver == null) {
+            receiver = AirplaneModeBroadcastReceiver()
+            val filter = IntentFilter().apply {
+                addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+            }
+            this.registerReceiver(receiver, filter)
+        }
+
         enableEdgeToEdge()
         val notifHandler = NotificationHandler(ctx = applicationContext)
         notifHandler.initNotifications()
@@ -104,5 +121,10 @@ class MainActivity : ComponentActivity() {
         intent.extras?.getString(Consts.FIRST_ACTION_EXTRA_KEY)?.let {
             Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        receiver?.let(::unregisterReceiver)
     }
 }
