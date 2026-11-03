@@ -13,13 +13,16 @@ object Consts {
     @RequiresApi(Build.VERSION_CODES.O)
     val notificationChannels = listOf(
         NotificationChannel(
-            "notif_101", "NOTIFICATIONS_FIRST_CHANNEL", NotificationManager.IMPORTANCE_LOW,
+            "notif_promo_101", "PROMOS_CHANNEL", NotificationManager.IMPORTANCE_DEFAULT,
         ),
         NotificationChannel(
-            "notif_102", "NOTIFICATIONS_SECOND_CHANNEL", NotificationManager.IMPORTANCE_DEFAULT,
+            "notif_auth_102", "AUTH_MESSAGES_CHANNEL", NotificationManager.IMPORTANCE_HIGH,
         ),
         NotificationChannel(
-            "notif_103", "NOTIFICATIONS_THIRD_CHANNEL", NotificationManager.IMPORTANCE_HIGH,
+            "notif_default_100", "DEFAULT_CHANNEL", NotificationManager.IMPORTANCE_DEFAULT,
         )
     )
+
+    const val PROMO_NOTIFICATION_LINK_KEY = "promo_notification_link"
+    const val FIRST_ACTION_EXTRA_KEY = "first_action_extra"
 }

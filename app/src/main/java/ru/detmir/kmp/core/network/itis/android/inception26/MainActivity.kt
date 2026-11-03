@@ -1,6 +1,9 @@
 package ru.detmir.kmp.core.network.itis.android.inception26
 
+import android.app.ComponentCaller
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,7 +15,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
-import ru.detmir.kmp.core.network.itis.android.inception26.model.NotificationModel
+import ru.detmir.kmp.core.network.itis.android.inception26.model.AuthNotification
+import ru.detmir.kmp.core.network.itis.android.inception26.model.PromoNotification
 import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.BottomSheetDefaultNav3Route
 import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.DetailsNav3Route
 import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.DialogSampleNav3Route
@@ -29,6 +33,9 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        intent?.extras?.getString(Consts.PROMO_NOTIFICATION_LINK_KEY)?.let {
+            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+        }
         enableEdgeToEdge()
         val notifHandler = NotificationHandler(ctx = applicationContext)
         notifHandler.initNotifications()
@@ -49,10 +56,16 @@ class MainActivity : ComponentActivity() {
                     entry<ListNav3Route> {
                         ListRoute { model ->
                             notifHandler.sendMessage(
-                                model = NotificationModel(
+//                                model = PromoNotification(
+//                                    id = 1,
+//                                    title = "Hello from Android",
+//                                    contentText = "Some content text sample",
+//                                    redirectLink = "https://somelink.sample.com/"
+//                                )
+                                model = AuthNotification(
                                     id = 1,
                                     title = "Hello from Android",
-                                    contentText = "Some content text sample"
+                                    authCode = "101412",
                                 )
                             )
                         }
@@ -83,7 +96,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        intent.extras?.getString(Consts.PROMO_NOTIFICATION_LINK_KEY)?.let {
+            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+        }
+        intent.extras?.getString(Consts.FIRST_ACTION_EXTRA_KEY)?.let {
+            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+        }
     }
 }
