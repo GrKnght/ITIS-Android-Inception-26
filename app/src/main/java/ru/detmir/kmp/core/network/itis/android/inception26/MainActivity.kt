@@ -1,10 +1,6 @@
 package ru.detmir.kmp.core.network.itis.android.inception26
 
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,12 +8,25 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
-import ru.detmir.kmp.core.network.itis.android.inception26.model.AuthNotification
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.BottomSheetDefaultNav3Route
 import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.DetailsNav3Route
 import ru.detmir.kmp.core.network.itis.android.inception26.nav.nav3.DialogSampleNav3Route
@@ -27,35 +36,58 @@ import ru.detmir.kmp.core.network.itis.android.inception26.screen.bottomsheet.De
 import ru.detmir.kmp.core.network.itis.android.inception26.screen.details.DetailsRoute
 import ru.detmir.kmp.core.network.itis.android.inception26.screen.dialogFirst.DialogContent
 import ru.detmir.kmp.core.network.itis.android.inception26.screen.list.ListRoute
-import ru.detmir.kmp.core.network.itis.android.inception26.util.AirplaneModeBroadcastReceiver
-import ru.detmir.kmp.core.network.itis.android.inception26.util.NotificationHandler
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
+
+class AuthException(message: String, cause: Throwable?) : Throwable(message, cause)
 
 class MainActivity : ComponentActivity() {
 
-    private var receiver: AirplaneModeBroadcastReceiver? = null
+    private val customScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Handler(Looper.getMainLooper()).postDelayed(
-            {
-                Toast.makeText(this, "Message after 5000 MS", Toast.LENGTH_SHORT).show()
-            }, 5000L
-        )
-        intent?.extras?.getString(Consts.PROMO_NOTIFICATION_LINK_KEY)?.let {
-            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-        }
-        if (receiver == null) {
-            receiver = AirplaneModeBroadcastReceiver()
-            val filter = IntentFilter().apply {
-                addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+        enableEdgeToEdge()
+
+        // Coroutine context = Job() + Name + Error Handler + Dispatcher
+        val handler = CoroutineExceptionHandler { ctx, ex ->
+            if (ex is AuthException) {
+                // Logout
+                println("TEST TAG - 401-st code received, logout")
+            } else {
+                // Default
             }
-            this.registerReceiver(receiver, filter)
         }
 
-        enableEdgeToEdge()
-        val notifHandler = NotificationHandler(ctx = applicationContext)
-        notifHandler.initNotifications()
+        lifecycleScope.async {
+
+        }
+
+        customScope.launch(handler) {
+
+            val showOnUi = launch(Dispatchers.Main) {
+                delay(2000L)
+                Toast.makeText(this@MainActivity, "Hello Toast", Toast.LENGTH_SHORT).show()
+            }
+
+            val third = launch {
+                println("TEST TAG - Third")
+                delay(3000L)
+                throw AuthException(message = "API returned 401", cause = null)
+            }
+
+            val asyncResult = async {
+                //
+                delay(5000L)
+                "Server response"
+            }.await()
+        }
+
+        customScope.launch(Dispatchers.Main) {
+            delay(5000L)
+            Toast.makeText(this@MainActivity, "Toast after 5 seconds", Toast.LENGTH_SHORT).show()
+        }
 
         setContent {
             val backstack = rememberNavBackStack(elements = arrayOf(ListNav3Route))
@@ -72,19 +104,7 @@ class MainActivity : ComponentActivity() {
                 entryProvider = entryProvider {
                     entry<ListNav3Route> {
                         ListRoute { model ->
-                            notifHandler.sendMessage(
-//                                model = PromoNotification(
-//                                    id = 1,
-//                                    title = "Hello from Android",
-//                                    contentText = "Some content text sample",
-//                                    redirectLink = "https://somelink.sample.com/"
-//                                )
-                                model = AuthNotification(
-                                    id = 1,
-                                    title = "Hello from Android",
-                                    authCode = "101412",
-                                )
-                            )
+                            backstack.add(DetailsNav3Route(model))
                         }
                     }
 
@@ -111,20 +131,5 @@ class MainActivity : ComponentActivity() {
                 }
             )
         }
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        intent.extras?.getString(Consts.PROMO_NOTIFICATION_LINK_KEY)?.let {
-            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-        }
-        intent.extras?.getString(Consts.FIRST_ACTION_EXTRA_KEY)?.let {
-            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        receiver?.let(::unregisterReceiver)
     }
 }

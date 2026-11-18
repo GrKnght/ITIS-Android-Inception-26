@@ -14,6 +14,7 @@ x-compose-nav = "2.10.2"
 x-serialization = "1.7.3"
 kotlin-serialization = "2.3.20"
 navigation3 = "1.2.0"
+coroutines = "1.11.0"
 
 # Coil
 coil = "3.2.0"
@@ -38,6 +39,8 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 # Coil
 coil-core = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
+# Coroutines
+coroutines-core =  { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines"}
 # Navigation
 x-compose-nav = { module = "androidx.navigation:navigation-compose", version.ref = "x-compose-nav" }
 x-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "x-serialization" }
